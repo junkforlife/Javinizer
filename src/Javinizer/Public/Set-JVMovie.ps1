@@ -441,47 +441,15 @@ public class ExtendedWebClient : WebClient {
                 }
             }
 
-            if ($RenameFile -and !$Update) {
+                        if ($RenameFile -and !$Update) {
                 try {
                     if ($RenameFolder) {
-                        if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-                            Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force:$Force
-                        } elseif ([System.Environment]::OSVersion.Platform -eq 'Unix') {
-                            if ($Force) {
-                                try {
-                                    Move-Item $Path $sortData.FilePath --force
-                                } catch {
-                                    Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force
-                                }
-                            } else {
-                                try {
-                                    Move-Item $Path $sortData.FilePath --no-clobber
-                                } catch {
-                                    Move-Item -LiteralPath $Path -Destination $sortData.FilePath
-                                }
-                            }
-                        }
+                        New-Item -ItemType HardLink -path $sortData.FilePath -Value $Path -Force:$Force
                     } else {
                         if ((Get-Item -LiteralPath $DestinationPath).Directory -ne (Get-Item -LiteralPath $Path).Directory) {
                             if ((Get-Item -LiteralPath $Path).FullName -ne $sortData.FilePath) {
                                 if (!(Test-Path -LiteralPath $sortData.FilePath)) {
-                                    if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-                                        Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force:$Force
-                                    } elseif ([System.Environment]::OSVersion.Platform -eq 'Unix') {
-                                        if ($Force) {
-                                            try {
-                                                Move-Item $Path $sortData.FilePath --force
-                                            } catch {
-                                                Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force
-                                            }
-                                        } else {
-                                            try {
-                                                Move-Item $Path $sortData.FilePath --no-clobber
-                                            } catch {
-                                                Move-Item -LiteralPath $Path -Destination $sortData.FilePath
-                                            }
-                                        }
-                                    }
+                                    New-Item -ItemType HardLink -path $sortData.FilePath -Value $Path -Force:$Force
                                     Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Info "[$($Data.Id)] [$($MyInvocation.MyCommand.Name)] Completed [$Path] => [$($sortData.FilePath)]"
                                 } else {
                                     Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Warning -Message "[$($Data.Id)] [$($MyInvocation.MyCommand.Name)] Completed [$Path] but did not move as the destination file already exists"
@@ -500,23 +468,7 @@ public class ExtendedWebClient : WebClient {
                         if ((Get-Item -LiteralPath $DestinationPath).Directory -ne (Get-Item -LiteralPath $Path).Directory) {
                             if ((Get-Item -LiteralPath $Path).FullName -ne $sortData.FilePath) {
                                 if (!(Test-Path -LiteralPath $sortData.FilePath)) {
-                                    if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
-                                        Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force:$Force
-                                    } elseif ([System.Environment]::OSVersion.Platform -eq 'Unix') {
-                                        if ($Force) {
-                                            try {
-                                                Move-Item $Path $sortData.FilePath --force
-                                            } catch {
-                                                Move-Item -LiteralPath $Path -Destination $sortData.FilePath -Force
-                                            }
-                                        } else {
-                                            try {
-                                                Move-Item $Path $sortData.FilePath --no-clobber
-                                            } catch {
-                                                Move-Item -LiteralPath $Path -Destination $sortData.FilePath
-                                            }
-                                        }
-                                    }
+                                    New-Item -ItemType HardLink -path $sortData.FilePath -Value $Path -Force:$Force
                                     Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Info "[$($Data.Id)] [$($MyInvocation.MyCommand.Name)] Completed [$Path] => [$($sortData.FilePath)]"
                                 } else {
                                     Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Warning -Message "[$($Data.Id)] [$($MyInvocation.MyCommand.Name)] Completed [$Path] but did not move as the destination file already exists"
@@ -533,3 +485,4 @@ public class ExtendedWebClient : WebClient {
         }
     }
 }
+
