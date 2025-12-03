@@ -1,4 +1,4 @@
-FROM python:3.9.6-bullseye
+FROM python:slim-bookworm
 
 # Add docker entrypoint script
 ADD docker-entrypoint.sh /
@@ -28,12 +28,20 @@ RUN unzip -q /home/Universal.linux-x64.1.5.13.zip -d /home/Universal/ \
 # Install mediainfo
 RUN apt-get install -y mediainfo
 
-# Install pwsh
-RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb \
+RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
-    && apt-get update \
-    && apt-get install -y powershell \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get update && apt-get install -y dotnet-sdk-8.0
+
+# Install pwsh
+RUN wget "http://ftp.us.debian.org/debian/pool/main/i/icu/libicu72_72.1-3+deb12u1_amd64.deb" && dpkg -i libicu72_72.1-3+deb12u1_amd64.deb
+RUN wget https://github.com/PowerShell/PowerShell/releases/download/v7.3.11/powershell_7.3.11-1.deb_amd64.deb \
+    && dpkg -i powershell_7.3.11-1.deb_amd64.deb \
+    && apt-get install -f
+
+RUN mkdir -p /home/data/Repository/repo/Javinizer
+ADD src/Javinizer /home/data/Repository/repo/Javinizer
+RUN pwsh -c "Register-PSRepository -Name 'home' -SourceLocation '/home/data/Repository/repo' -InstallationPolicy Trusted" \
+     && pwsh -c "Publish-Module -Path /home/data/Repository/repo/Javinizer -Repository home -NuGetApiKey 'ABC123'" && pwsh -c "Install-Module Javinizer -Repository 'home'"
 
 # Install pwsh modules
 RUN pwsh -c "Set-PSRepository 'PSGallery' -InstallationPolicy Trusted" \
@@ -42,8 +50,7 @@ RUN pwsh -c "Set-PSRepository 'PSGallery' -InstallationPolicy Trusted" \
     && pwsh -c "Install-Module UniversalDashboard.UDPlayer" \
     && pwsh -c "Install-Module UniversalDashboard.UDSpinner" \
     && pwsh -c "Install-Module UniversalDashboard.UDScrollUp" \
-    && pwsh -c "Install-Module UniversalDashboard.CodeEditor" \
-    && pwsh -c "Install-Module Javinizer"
+    && pwsh -c "Install-Module UniversalDashboard.CodeEditor"
 
 # Install python modules
 RUN pip3 install pillow \
